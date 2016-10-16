@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 rm -rf ~/.vim
 ln -s $PWD/vim/ ~/.vim
-pushd ~/.vim
-sh plugins.sh
+mkdir -p ~/.vim/bundle
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 popd
 VI=$(which vi)
 VIM=$(which vim)
