@@ -1,40 +1,54 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-" set the runtime path to include Vundle and initialize
-" If you get error of Vundle get it: 
-" git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-" and after that start vim and run PluginInstall
-"
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
+" Load vim-plug
+if empty(glob("~/.vim/autoload/plug.vim"))
+    execute '!curl -fLo ~/.vim/autoload/plug.vim https://raw.github.com/junegunn/vim-plug/master/plug.vim'
+endif
 
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
+" Specify a directory for plugins
+" - For Neovim: ~/.local/share/nvim/plugged
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.vim/plugged')
 
-Plugin 'lukaszkorecki/CoffeeTags'
-Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'majutsushi/tagbar'
-Plugin 'bling/vim-airline'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'digitaltoad/vim-jade'
-Plugin 'eparreno/vim-l9'
-Plugin 'elixir-lang/vim-elixir'
-Plugin 'fatih/vim-go'
-Plugin 'davidhalter/jedi-vim'
-Plugin 'itchyny/lightline.vim'
-Plugin 'tpope/vim-fugitive'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'mileszs/ack.vim'
-Plugin 'mrtazz/simplenote.vim'
-"
+Plug 'rakr/vim-one'
+Plug 'lukaszkorecki/CoffeeTags'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'majutsushi/tagbar'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'kchmck/vim-coffee-script'
+Plug 'digitaltoad/vim-jade'
+Plug 'eparreno/vim-l9'
+Plug 'elixir-lang/vim-elixir'
+Plug 'fatih/vim-go'
+Plug 'davidhalter/jedi-vim'
+Plug 'tpope/vim-fugitive'
+Plug 'leafgarland/typescript-vim'
+Plug 'mileszs/ack.vim'
+Plug 'mrtazz/simplenote.vim'
+Plug 'Chiel92/vim-autoformat'
+Plug 'janko-m/vim-test'
+Plug 'flowtype/vim-flow'
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'wokalski/autocomplete-flow'
+  " For func argument completion
+  Plug 'Shougo/neosnippet'
+  Plug 'Shougo/neosnippet-snippets'
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+let g:deoplete#enable_at_startup = 1
+let g:neosnippet#enable_completed_snippet = 1
 "
 "
 " All of your Plugins must be added before the following line
-call vundle#end()            " required
+call plug#end()            " required
+
 filetype plugin indent on    " required
 
 syntax enable
@@ -79,32 +93,32 @@ nmap <c-a> :TagbarToggle<CR>
 command Lint CoffeeLint | :botright cwindow
 
 let g:tagbar_type_go = {
-    \ 'ctagstype' : 'go',
-    \ 'kinds'     : [
-        \ 'p:package',
-        \ 'i:imports:1',
-        \ 'c:constants',
-        \ 'v:variables',
-        \ 't:types',
-        \ 'n:interfaces',
-        \ 'w:fields',
-        \ 'e:embedded',
-        \ 'm:methods',
-        \ 'r:constructor',
-        \ 'f:functions'
-    \ ],
-    \ 'sro' : '.',
-    \ 'kind2scope' : {
-        \ 't' : 'ctype',
-        \ 'n' : 'ntype'
-    \ },
-    \ 'scope2kind' : {
-        \ 'ctype' : 't',
-        \ 'ntype' : 'n'
-    \ },
-    \ 'ctagsbin'  : 'gotags',
-    \ 'ctagsargs' : '-sort -silent'
-\ }
+            \ 'ctagstype' : 'go',
+            \ 'kinds'     : [
+            \ 'p:package',
+            \ 'i:imports:1',
+            \ 'c:constants',
+            \ 'v:variables',
+            \ 't:types',
+            \ 'n:interfaces',
+            \ 'w:fields',
+            \ 'e:embedded',
+            \ 'm:methods',
+            \ 'r:constructor',
+            \ 'f:functions'
+            \ ],
+            \ 'sro' : '.',
+            \ 'kind2scope' : {
+            \ 't' : 'ctype',
+            \ 'n' : 'ntype'
+            \ },
+            \ 'scope2kind' : {
+            \ 'ctype' : 't',
+            \ 'ntype' : 'n'
+            \ },
+            \ 'ctagsbin'  : 'gotags',
+            \ 'ctagsargs' : '-sort -silent'
+            \ }
 
 " Auto open
 autocmd vimenter * NERDTree
@@ -118,13 +132,16 @@ nmap <Leader>x :NERDTreeToggle<CR>
 " " reveal the current file in NERDTree
 map <Leader>f :NERDTreeFind<CR>
 " let NERDTreeQuitOnOpen = 1
-let NERDTreeStatusLine = -1
+" let NERDTreeStatusLine = -1
 
 " C++ header/source switch
 nmap <F4> :e %:p:s,.hh$,.X123X,:s,.cc$,.hh,:s,.X123X$,.cc,<CR>
 
 " OSX clipboard
-set clipboard=unnamedplus,unnamed,autoselect
+if !has('nvim-0.1.5')        " True color in neovim wasn't added until 0.1.5
+    set clipboard=unnamedplus,unnamed,autoselect
+endif
+
 
 " Macros for quoting/unquting words
 " 'quote' a word
@@ -145,138 +162,8 @@ endfun
 autocmd FileType c,cpp,java,php,ruby,python,js,coffee autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
 au BufNewFile,BufRead *.es6 set filetype=javascript
 
-" ======= itchyny/lightline settings =====
-
-let g:lightline = {
-      \ 'colorscheme': 'wombat',
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ], ['ctrlpmark'] ],
-      \   'right': [ [ 'syntastic', 'lineinfo' ], ['percent'], [ 'fileformat', 'fileencoding', 'filetype' ] ]
-      \ },
-      \ 'component_function': {
-      \   'fugitive': 'LightLineFugitive',
-      \   'filename': 'LightLineFilename',
-      \   'fileformat': 'LightLineFileformat',
-      \   'filetype': 'LightLineFiletype',
-      \   'fileencoding': 'LightLineFileencoding',
-      \   'mode': 'LightLineMode',
-      \   'ctrlpmark': 'CtrlPMark',
-      \ },
-      \ 'component_expand': {
-      \   'syntastic': 'SyntasticStatuslineFlag',
-      \ },
-      \ 'component_type': {
-      \   'syntastic': 'error',
-      \ },
-      \ 'subseparator': { 'left': '|', 'right': '|' }
-      \ }
-
-function! LightLineModified()
-  return &ft =~ 'help' ? '' : &modified ? '+' : &modifiable ? '' : '-'
-endfunction
-
-function! LightLineReadonly()
-  return &ft !~? 'help' && &readonly ? 'RO' : ''
-endfunction
-
-function! LightLineFilename()
-  let fname = expand('%:t')
-  return fname == 'ControlP' && has_key(g:lightline, 'ctrlp_item') ? g:lightline.ctrlp_item :
-        \ fname == '__Tagbar__' ? g:lightline.fname :
-        \ fname =~ '__Gundo\|NERD_tree' ? '' :
-        \ &ft == 'vimfiler' ? vimfiler#get_status_string() :
-        \ &ft == 'unite' ? unite#get_status_string() :
-        \ &ft == 'vimshell' ? vimshell#get_status_string() :
-        \ ('' != LightLineReadonly() ? LightLineReadonly() . ' ' : '') .
-        \ ('' != fname ? fname : '[No Name]') .
-        \ ('' != LightLineModified() ? ' ' . LightLineModified() : '')
-endfunction
-
-function! LightLineFugitive()
-  try
-    if expand('%:t') !~? 'Tagbar\|Gundo\|NERD' && &ft !~? 'vimfiler' && exists('*fugitive#head')
-      let mark = ''  " edit here for cool mark
-      let branch = fugitive#head()
-      return branch !=# '' ? mark.branch : ''
-    endif
-  catch
-  endtry
-  return ''
-endfunction
-
-function! LightLineFileformat()
-  return winwidth(0) > 70 ? &fileformat : ''
-endfunction
-
-function! LightLineFiletype()
-  return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
-endfunction
-
-function! LightLineFileencoding()
-  return winwidth(0) > 70 ? (&fenc !=# '' ? &fenc : &enc) : ''
-endfunction
-
-function! LightLineMode()
-  let fname = expand('%:t')
-  return fname == '__Tagbar__' ? 'Tagbar' :
-        \ fname == 'ControlP' ? 'CtrlP' :
-        \ fname == '__Gundo__' ? 'Gundo' :
-        \ fname == '__Gundo_Preview__' ? 'Gundo Preview' :
-        \ fname =~ 'NERD_tree' ? 'NERDTree' :
-        \ &ft == 'unite' ? 'Unite' :
-        \ &ft == 'vimfiler' ? 'VimFiler' :
-        \ &ft == 'vimshell' ? 'VimShell' :
-        \ winwidth(0) > 60 ? lightline#mode() : ''
-endfunction
-
-function! CtrlPMark()
-  if expand('%:t') =~ 'ControlP' && has_key(g:lightline, 'ctrlp_item')
-    call lightline#link('iR'[g:lightline.ctrlp_regex])
-    return lightline#concatenate([g:lightline.ctrlp_prev, g:lightline.ctrlp_item
-          \ , g:lightline.ctrlp_next], 0)
-  else
-    return ''
-  endif
-endfunction
-
-let g:ctrlp_status_func = {
-  \ 'main': 'CtrlPStatusFunc_1',
-  \ 'prog': 'CtrlPStatusFunc_2',
-  \ }
-
-function! CtrlPStatusFunc_1(focus, byfname, regex, prev, item, next, marked)
-  let g:lightline.ctrlp_regex = a:regex
-  let g:lightline.ctrlp_prev = a:prev
-  let g:lightline.ctrlp_item = a:item
-  let g:lightline.ctrlp_next = a:next
-  return lightline#statusline(0)
-endfunction
-
-function! CtrlPStatusFunc_2(str)
-  return lightline#statusline(0)
-endfunction
-
-let g:tagbar_status_func = 'TagbarStatusFunc'
-
-function! TagbarStatusFunc(current, sort, fname, ...) abort
-    let g:lightline.fname = a:fname
-  return lightline#statusline(0)
-endfunction
-
-augroup AutoSyntastic
-  autocmd!
-  autocmd BufWritePost *.c,*.cpp call s:syntastic()
-augroup END
-function! s:syntastic()
-  SyntasticCheck
-  call lightline#update()
-endfunction
-
-let g:unite_force_overwrite_statusline = 0
-let g:vimfiler_force_overwrite_statusline = 0
-let g:vimshell_force_overwrite_statusline = 0
-
 " ======= blig/vim-airline settings =====
+" let g:airline_theme='one'
 " Always show the status bar
 " set laststatus=2
 
@@ -289,118 +176,122 @@ let g:vimshell_force_overwrite_statusline = 0
 " ----- scrooloose/syntastic settings -----
 let g:syntastic_error_symbol = '✘'
 let g:syntastic_warning_symbol = "▲"
+let g:syntastic_javascript_checkers=['eslint']
+let g:syntastic_python_checkers = ['pylint']
+let g:syntastic_python_pylint_post_args = '--msg-template="{path}:{line}:{column}:{C}: [{symbol} {msg_id}] {msg}"'
+let g:syntastic_swift_checkers = ['swiftpm', 'swiftlint']
 augroup mySyntastic
-  au!
-  au FileType tex let b:syntastic_mode = "passive"
+    au!
+    au FileType tex let b:syntastic_mode = "passive"
 augroup END
 
-" FuzzyFinder keybindings 
-function! OpenFile() 
-    if stridx(bufname("%"),"NERD_tree") >= 0 
-       :wincmd w 
-    endif 
-    :FufFile 
-endfunction 
+" FuzzyFinder keybindings
+function! OpenFile()
+    if stridx(bufname("%"),"NERD_tree") >= 0
+        :wincmd w
+    endif
+    :FufFile
+endfunction
 noremap <silent> <c-p> :call OpenFile()<CR>
-function! OpenBuffer() 
-    if stridx(bufname("%"),"NERD_tree") >= 0 
-       :wincmd w 
-    endif 
-    :FufBuffer 
-endfunction 
+function! OpenBuffer()
+    if stridx(bufname("%"),"NERD_tree") >= 0
+        :wincmd w
+    endif
+    :FufBuffer
+endfunction
 noremap <silent> <D-b> :call OpenBuffer()<CR>
 
 " coffeescript textobjects indent stuff
 " See http://andrewradev.com/2012/04/03/manipulating-coffeescript-with-vim-part-1-text-objects/
 " for details on the implementation
- 
+
 onoremap ii :<c-u>call <SID>IndentTextObject()<cr>
 onoremap аi :<c-u>call <SID>IndentTextObject()<cr>
 xnoremap ii :<c-u>call <SID>IndentTextObject()<cr>
 xnoremap ai :<c-u>call <SID>IndentTextObject()<cr>
 function! s:IndentTextObject()
-  let upper = s:UpperIndentLimit(line('.'))
-  let lower = s:LowerIndentLimit(line('.'))
-  call s:MarkVisual('V', upper, lower)
+    let upper = s:UpperIndentLimit(line('.'))
+    let lower = s:LowerIndentLimit(line('.'))
+    call s:MarkVisual('V', upper, lower)
 endfunction
- 
+
 onoremap if :<c-u>call <SID>FunctionTextObject('i')<cr>
 onoremap af :<c-u>call <SID>FunctionTextObject('a')<cr>
 xnoremap if :<c-u>call <SID>FunctionTextObject('i')<cr>
 xnoremap af :<c-u>call <SID>FunctionTextObject('a')<cr>
 function! s:FunctionTextObject(type)
-  let function_start = search('\((.\{-})\)\=\s*[-=]>$', 'Wbc')
-  if function_start <= 0
-    return
-  endif
- 
-  let body_start = function_start + 1
-  if body_start > line('$') || indent(nextnonblank(body_start)) <= indent(function_start)
-    if a:type == 'a'
-      normal! vg_
+    let function_start = search('\((.\{-})\)\=\s*[-=]>$', 'Wbc')
+    if function_start <= 0
+        return
     endif
- 
-    return
-  endif
- 
-  let indent_limit = s:LowerIndentLimit(body_start)
- 
-  if a:type == 'i'
-    let start = body_start
-  else
-    let start = function_start
-  endif
- 
-  call s:MarkVisual('v', start, indent_limit)
+
+    let body_start = function_start + 1
+    if body_start > line('$') || indent(nextnonblank(body_start)) <= indent(function_start)
+        if a:type == 'a'
+            normal! vg_
+        endif
+
+        return
+    endif
+
+    let indent_limit = s:LowerIndentLimit(body_start)
+
+    if a:type == 'i'
+        let start = body_start
+    else
+        let start = function_start
+    endif
+
+    call s:MarkVisual('v', start, indent_limit)
 endfunction
- 
+
 function! s:LowerIndentLimit(lineno)
-  let base_indent  = indent(a:lineno)
-  let current_line = a:lineno
-  let next_line    = nextnonblank(current_line + 1)
- 
-  while current_line < line('$') && indent(next_line) >= base_indent
-    let current_line = next_line
+    let base_indent  = indent(a:lineno)
+    let current_line = a:lineno
     let next_line    = nextnonblank(current_line + 1)
-  endwhile
- 
-  return current_line
+
+    while current_line < line('$') && indent(next_line) >= base_indent
+        let current_line = next_line
+        let next_line    = nextnonblank(current_line + 1)
+    endwhile
+
+    return current_line
 endfunction
- 
+
 function! s:UpperIndentLimit(lineno)
-  let base_indent  = indent(a:lineno)
-  let current_line = a:lineno
-  let prev_line    = prevnonblank(current_line - 1)
- 
-  while current_line > 0 && indent(prev_line) >= base_indent
-    let current_line = prev_line
+    let base_indent  = indent(a:lineno)
+    let current_line = a:lineno
     let prev_line    = prevnonblank(current_line - 1)
-  endwhile
- 
-  return current_line
+
+    while current_line > 0 && indent(prev_line) >= base_indent
+        let current_line = prev_line
+        let prev_line    = prevnonblank(current_line - 1)
+    endwhile
+
+    return current_line
 endfunction
- 
+
 function! s:MarkVisual(command, start_line, end_line)
-  if a:start_line != line('.')
-    exe a:start_line
-  endif
- 
-  if a:end_line > a:start_line
-    exe 'normal! '.a:command.(a:end_line - a:start_line).'jg_'
-  else
-    exe 'normal! '.a:command.'g_'
-  endif
+    if a:start_line != line('.')
+        exe a:start_line
+    endif
+
+    if a:end_line > a:start_line
+        exe 'normal! '.a:command.(a:end_line - a:start_line).'jg_'
+    else
+        exe 'normal! '.a:command.'g_'
+    endif
 endfunction
 
 " :shell
 function! s:ExecuteInShell(command)
     let command = join(map(split(a:command), 'expand(v:val)'))
     let winnr = bufwinnr('^' . command . '$')
-    silent! execute  winnr < 0 ? 'botright new ' . fnameescape(command) : winnr . 'wincmd w' 
+    silent! execute  winnr < 0 ? 'botright new ' . fnameescape(command) : winnr . 'wincmd w'
     setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
     echo 'Execute ' . command . '...'
     silent! execute 'silent %!'. command
-    silent! execute 'resize ' . 10 
+    silent! execute 'resize ' . 10
     silent! execute '$'
     silent! redraw
     silent! execute 'au BufUnload <buffer> execute bufwinnr(' . bufnr('#') . ') . ''wincmd w'''
@@ -410,10 +301,40 @@ endfunction
 command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
 
 " auto run npm test
-" autocmd BufWritePost *.coffee Shell npm test 
+" autocmd BufWritePost *.coffee Shell npm test
+au BufWrite *\.js :Autoformat
 silent! so .vimlocal
 
 
 " find in files
 :set wildignore+=node_modules/**
 noremap <F4> :Ack <cword><cr>
+
+" vim-test
+nmap <silent> <leader>t :TestNearest<CR>
+nmap <silent> <leader>T :TestFile<CR>
+nmap <silent> <leader>a :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
+nmap <silent> <leader>g :TestVisit<CR>
+let test#javascript#mocha#file_pattern = 'mocha'
+let test#javascript#runner = 'jest'
+
+" vim-flow
+" "Use locally installed flow
+let local_flow = finddir('node_modules', '.;') . '/.bin/flow'
+if matchstr(local_flow, "^\/\\w") == ''
+    let local_flow= getcwd() . "/" . local_flow
+endif
+if executable(local_flow)
+  let g:flow#flowpath = local_flow
+endif
+let g:flow#autoclose = 1
+let g:flow#errjmp = 1
+
+filetype plugin on
+set omnifunc=syntaxcomplete#Complete
+
+" NeoVIM
+if has('nvim-0.1.5')        " True color in neovim wasn't added until 0.1.5
+    set termguicolors
+endif
