@@ -14,7 +14,6 @@ call plug#begin('~/.vim/plugged')
 Plug 'rakr/vim-one'
 Plug 'lukaszkorecki/CoffeeTags'
 Plug 'scrooloose/nerdtree'
-Plug 'scrooloose/syntastic'
 Plug 'majutsushi/tagbar'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -26,11 +25,24 @@ Plug 'fatih/vim-go'
 Plug 'davidhalter/jedi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'leafgarland/typescript-vim'
+Plug 'w0rp/ale'
 Plug 'mileszs/ack.vim'
 Plug 'mrtazz/simplenote.vim'
 Plug 'Chiel92/vim-autoformat'
 Plug 'janko-m/vim-test'
-Plug 'flowtype/vim-flow'
+" Plug 'flowtype/vim-flow'
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
+Plug 'junegunn/fzf'
+
+" Color themes
+Plug 'NLKNguyen/papercolor-theme'
+Plug 'drewtempelmeyer/palenight.vim'
+Plug 'ayu-theme/ayu-vim'
+
+" Autocomplete
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   Plug 'wokalski/autocomplete-flow'
@@ -44,6 +56,11 @@ else
 endif
 let g:deoplete#enable_at_startup = 1
 let g:neosnippet#enable_completed_snippet = 1
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" Find in files
+Plug 'eugen0329/vim-esearch'
+
 "
 "
 " All of your Plugins must be added before the following line
@@ -58,8 +75,8 @@ filetype plugin indent on
 syntax on
 " colorscheme solarized
 " colorscheme desert
-colorscheme one
-set background=light
+colorscheme palenight
+set background=dark
 
 " Tabs as spaces
 set smartindent
@@ -120,6 +137,20 @@ let g:tagbar_type_go = {
             \ 'ctagsargs' : '-sort -silent'
             \ }
 
+let g:tagbar_type_typescript = {
+  \ 'ctagstype': 'typescript',
+  \ 'kinds': [
+    \ 'c:classes',
+    \ 'n:modules',
+    \ 'f:functions',
+    \ 'v:variables',
+    \ 'v:varlambdas',
+    \ 'm:members',
+    \ 'i:interfaces',
+    \ 'e:enums',
+  \ ]
+  \ }
+
 " Auto open
 autocmd vimenter * NERDTree
 let g:NERDTreeWinSize = 40
@@ -140,6 +171,8 @@ nmap <F4> :e %:p:s,.hh$,.X123X,:s,.cc$,.hh,:s,.X123X$,.cc,<CR>
 " OSX clipboard
 if !has('nvim-0.1.5')        " True color in neovim wasn't added until 0.1.5
     set clipboard=unnamedplus,unnamed,autoselect
+else
+    set clipboard=unnamedplus
 endif
 
 
@@ -173,17 +206,17 @@ au BufNewFile,BufRead *.es6 set filetype=javascript
 " Show airline for tabs too
 " let g:airline#extensions#tabline#enabled = 1
 
-" ----- scrooloose/syntastic settings -----
-let g:syntastic_error_symbol = '✘'
-let g:syntastic_warning_symbol = "▲"
-let g:syntastic_javascript_checkers=['eslint']
-let g:syntastic_python_checkers = ['pylint']
-let g:syntastic_python_pylint_post_args = '--msg-template="{path}:{line}:{column}:{C}: [{symbol} {msg_id}] {msg}"'
-let g:syntastic_swift_checkers = ['swiftpm', 'swiftlint']
-augroup mySyntastic
-    au!
-    au FileType tex let b:syntastic_mode = "passive"
-augroup END
+" jedi-vim
+let g:jedi#force_py_version = 3
+
+" ALE settings
+highlight ALEError guibg=Magenta guifg=White
+let g:ale_echo_msg_error_str = 'ERROR'
+let g:ale_echo_msg_warning_str = 'WARN'
+let g:ale_lint_delay = 450
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
 
 " FuzzyFinder keybindings
 function! OpenFile()
@@ -302,7 +335,7 @@ command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
 
 " auto run npm test
 " autocmd BufWritePost *.coffee Shell npm test
-au BufWrite *\.js :Autoformat
+" au BufWrite *\.js :Autoformat
 silent! so .vimlocal
 
 
@@ -321,15 +354,27 @@ let test#javascript#runner = 'jest'
 
 " vim-flow
 " "Use locally installed flow
-let local_flow = finddir('node_modules', '.;') . '/.bin/flow'
-if matchstr(local_flow, "^\/\\w") == ''
-    let local_flow= getcwd() . "/" . local_flow
-endif
-if executable(local_flow)
-  let g:flow#flowpath = local_flow
-endif
-let g:flow#autoclose = 1
-let g:flow#errjmp = 1
+" let local_flow = finddir('node_modules', '.;') . '/.bin/flow'
+" if matchstr(local_flow, "^\/\\w") == ''
+    " let local_flow= getcwd() . "/" . local_flow
+" endif
+" if executable(local_flow)
+  " let g:flow#flowpath = local_flow
+" endif
+" let g:flow#autoclose = 1
+" let g:flow#errjmp = 0
+
+let g:LanguageClient_serverCommands = {
+\ 'javascript': ['flow-language-server', '--stdio'],
+\ }
+
+nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+nnoremap <silent> gr :call LanguageClient_textDocument_references()<CR>
+
+" (Optionally) automatically start language servers.
+let g:LanguageClient_autoStart = 1
 
 filetype plugin on
 set omnifunc=syntaxcomplete#Complete
@@ -338,3 +383,16 @@ set omnifunc=syntaxcomplete#Complete
 if has('nvim-0.1.5')        " True color in neovim wasn't added until 0.1.5
     set termguicolors
 endif
+
+"highlight Cursor guifg=white guibg=white
+set guicursor=n:block-Cursor
+
+
+" Find in files
+let g:esearch = {
+  \ 'adapter':    'ack',
+  \ 'backend':    'nvim',
+  \ 'out':        'qflist',
+  \ 'batch_size': 1000,
+  \ 'use':        ['visual', 'hlsearch', 'word_under_cursor', 'last'],
+  \}
