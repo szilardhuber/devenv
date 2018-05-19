@@ -30,6 +30,7 @@ Plug 'mileszs/ack.vim'
 Plug 'mrtazz/simplenote.vim'
 Plug 'Chiel92/vim-autoformat'
 Plug 'janko-m/vim-test'
+Plug 'christoomey/vim-tmux-navigator'
 " Plug 'flowtype/vim-flow'
 Plug 'autozimu/LanguageClient-neovim', {
     \ 'branch': 'next',
