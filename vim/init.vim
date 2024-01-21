@@ -1,1 +1,0 @@
-/Users/szilardhuber/.vim/vimrc
